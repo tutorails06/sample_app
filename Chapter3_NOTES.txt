@@ -1,0 +1,804 @@
+
+Ces notes sont prises au fur a et a mesure que je progresse 
+dans le tutorial Rails.
+
+Etat initial:
+- Xubuntu 13.10
+- Installation des paquetages postgres 
+$ sudo apt-get install postgresql postgresql-server-dev-all 
+- Installation de l'editeur Sublime Text
+Voir http://www.sublimetext.com/2
+
+Le tutorial est accessible ici:
+http://www.railstutorial.org/book
+
+Reinstallation de ruby:
+ Si rbenv etait deja installe:
+ $ rm -rf ~/.rbenv
+ Puis
+ $ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv 
+ $ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build 
+ $ rbenv install 1.9.3-p547
+ $ rbenv global 1.9.3-p547 
+ $ rbenv rehash
+ $ gem install hobo
+ $ rbenv rehash
+
+ ----8<  vmware: SNAPSHOT 1 >8-----
+
+PRELIMINAIRES
+
+Creation d'un compte email sur gmail <tuto.rails06@gmail.com>
+ATTENTION: Remplacer par votre propre email!!
+
+Creation d'un compte github sur www.github.com
+
+Creation de clefs ssh
+$ ssh-keygen -t rsa
+puis <enter>, <enter>, <enter>
+
+Installation des clefs sur github
+
+$ cat ~/.ssh/id_rsa.pub
+Copier tout ce qui s'affiche jusqu'au prompt suivant dans le paste buffer:
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8WGi3JtjrpESlmHrv0UCe2YgU3FxwymgYqHjg2H1pOqd8TzPXXBg8qGiSJUCK6/mPfGC05U2Gtpb8hFAI6HlO1gq6Jx   >>>>   CONTENU DU FICHIER  ~/.ssh/id_rsa.pub  <<<<   +/MWeY84sQH7cubUa7CZfzscLQzhYMnMcravRkqm4sabwotGzJL7xbgTgsvk5YnGsokuZj8w9Sit4+iIuSsQsS1s5Tu1fysJ/6hJhB/GKMRR2bUEBtZP59m3I82DOi5Up0hwln8Sud9Bj1fLUCBVjC0uBfjXkEZunVP tprails@ubuntu
+Sur le site github, aller sur la page des preferences, et cliquer sur l'onglet SSH keys
+Cliquer sur bouton "Add SSH Keys"
+Title: VM tuto SNAPSHOT 1 
+Key: <Coller le blurb ci-dessus>
+Cliquer sur bouton vert "Add Key"
+Essayer la clef a partir d'un terminal:
+$ ssh-add
+$ ssh git@github.com
+The authenticity of host 'github.com (192.30.252.130)' can't be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'github.com,192.30.252.130' (RSA) to the list of known hosts.
+PTY allocation request failed on channel 0
+Hi <login@github>! You've successfully authenticated, but GitHub does not provide shell access.
+Connection to github.com closed.
+
+Configuration globale de git:
+$ git config --global user.email "tuto.rails06@gmail.com"
+$ git config --global user.name "Tuto User"
+
+Creation d'un compte sur Heroku
+Se rendre sur le site heroku.com ...
+
+Installation de la toolbelt heroku
+Se rendre sur le site https://toolbelt.heroku.com/
+Choisir sa distribution (dans cette vm: Debian/Ubuntu)
+Copier coller la commande qui est donnee dans un terminal:
+$ wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+(demande le mot de passe superutilisateur)
+
+Installation de la clef ssh sur heroku
+(idem github)
+
+Chapitre 3:
+
+Creation d'un nouveau projet "Sample App"
+
+$ cd rails_project
+$ rails new sample_app --skip-test-unit  # Takes some time...
+$ cd sample_app
+
+Configuration de git
+$ git init
+$ git add .
+
+Creation d'un repo sur github
+A partir de la page web du compte github, retourner sur la page d'accueil.
+
+Dans la liste "Your repositories" cliquer sur le bouton
+"New repository"
+Dans la fenetre Repository name, entrer "Sample_app", laisser description vide, choisir le type public, et NE PAS choisir "Initialize with README"
+
+Cliquer sur create.
+
+Sur la nouvelle page, cliquer sur SSH dans la fenetre quick-setup, et cpier le lien qui s'affihe dans le paste buffer:
+git@github.com:tutorails06/sample_app.git
+
+Ajouter le remote sous le nom "origin":
+$ git remote add origin git@github.com:tutorails06/sample_app.git
+
+Creer un .gitignore
+(par exemple ajouter une ligne avec *~ pour ne pas archiver les
+fichiers de sauvegarde de emacs)
+
+Pousser la version initiale sur le repo github
+$ ssh-add  ## pour etre sur d'utiliser la clef ssh
+$ git push origin master
+Resultat si ok:
+Warning: Permanently added the RSA host key for IP address '192.30.252.131' to the list of known hosts.
+Counting objects: 58, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (47/47), done.
+Writing objects: 100% (58/58), 13.85 KiB | 0 bytes/s, done.
+Total 58 (delta 2), reused 0 (delta 0)
+To git@github.com:tutorails06/sample_app.git
+ * [new branch]      master -> master
+
+Creer la nouvelle app sur heroku
+$ heroku create
+(Donner le login/password utilise pour creer le compte heroku)
+$ git push heroku master
+Resultat avec une erreur (normal, voir solution plus bas):
+
+The authenticity of host 'heroku.com (50.19.85.154)' can't be established.
+RSA key fingerprint is 8b:48:5e:67:0e:c9:16:47:32:f2:87:0c:1f:c8:60:ad.
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+       An error occurred while installing sqlite3 (1.3.9), and Bundler cannot continue.
+       Make sure that `gem install sqlite3 -v '1.3.9'` succeeds before bundling.
+ !
+ !     Failed to install gems via Bundler.
+ !     
+ !     Detected sqlite3 gem which is not supported on Heroku.
+ !     https://devcenter.heroku.com/articles/sqlite3
+ !
+
+ !     Push rejected, failed to compile Ruby app
+
+To git@heroku.com:fierce-springs-9609.git
+ ! [remote rejected] master -> master (pre-receive hook declined)
+error: failed to push some refs to 'git@heroku.com:fierce-springs-9609.git'
+
+Solution:
+1/ Basculer sur la configuration postgres.
+Editer le fichier "config/database.yml"
+Resultat de la commande git diff:
+diff --git a/config/database.yml b/config/database.yml
+index 51a4dd4..328494d 100644
+--- a/config/database.yml
++++ b/config/database.yml
+@@ -4,22 +4,28 @@
+ #   Ensure the SQLite 3 gem is defined in your Gemfile
+ #   gem 'sqlite3'
+ development:
+-  adapter: sqlite3
+-  database: db/development.sqlite3
++  adapter: postgresql
++  database: sample_app_development
+   pool: 5
+   timeout: 5000
++  user: tprails
++  password:
+ 
+ # Warning: The database defined as "test" will be erased and
+ # re-generated from your development database when you run "rake".
+ # Do not set this db to the same as development or production.
+ test:
+-  adapter: sqlite3
+-  database: db/test.sqlite3
++  adapter: postgresql
++  database: sample_app_test
+   pool: 5
+   timeout: 5000
++  user: tprails
++  password:
+ 
+ production:
+-  adapter: sqlite3
+-  database: db/production.sqlite3
++  adapter: postgresql
++  database: sample_app_production
+   pool: 5
+   timeout: 5000
++  user: tprails
++  password:
+
+2/ Modifier le gemfile:
+source 'https://rubygems.org'
+ruby '1.9.3'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '4.0.5'
+
+# Attention a la version ici!
+gem 'pg', "~> 0.17.1"
+
+# Requis par heroku
+gem 'rails_12factor', '0.0.2'
+
+group :development do
+  # On utilise cela pour les tests
+  gem 'rspec-rails', '2.14.2'
+end
+
+group :assets do
+  # Use SCSS for stylesheets
+  gem 'sass-rails', '~> 4.0.0'
+  # Use Uglifier as compressor for JavaScript assets
+  gem 'uglifier', '>= 1.3.0'
+  # Use CoffeeScript for .js.coffee assets and views
+  gem 'coffee-rails', '~> 4.0.0'
+end
+
+# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+# gem 'therubyracer', platforms: :ruby
+
+# Use jquery as the JavaScript library
+gem 'jquery-rails'
+
+group :test do
+   gem 'capybara', '1.1.2'
+end
+
+# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
+gem 'turbolinks'
+
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'jbuilder', '~> 1.2'
+
+group :doc do
+  # bundle exec rake doc:rails generates the API under doc/api.
+  gem 'sdoc', require: false
+end
+
+# Use ActiveModel has_secure_password
+# gem 'bcrypt-ruby', '~> 3.1.2'
+
+# Use unicorn as the app server
+# gem 'unicorn'
+
+# Use Capistrano for deployment
+# gem 'capistrano', group: :development
+
+# Use debugger
+# gem 'debugger', group: [:development, :test]
+
+3/ Mettre a jour les gem
+$ bundle install
+$ bundle update
+
+Creation de la base de donnees postgres.
+
+Erreur la toute premiere que postgres est utilise: 
+ $ rake db:create
+(in /home/tprails/rails_projects/sample_app)
+FATAL:  role "tprails" does not exist
+/home/tprails/.rbenv/versions/1.9.3-p547/lib/ruby/gems/1.9.1/gems/activerecord-4.0.5/lib/active_record/connection_adapters/postgresql_adapter.rb:848:in `initialize'
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+Solution: initialiser le compte utilisateur postgres dans la base.
+$ sudo -s  			# Devenir root
+# su - postgres  	# Devenir utilisateur postgres
+$ createuser -d -P tprails
+Enter password for new role: <ENTER>
+Enter it again: <ENTER>
+Shall the new role be a superuser? (y/n) y
+$ exit
+# exit
+$ rake db:create
+(pas d'erreur = succes)
+
+Initialisation de la base de development:
+$ rake db:migrate
+
+Initialisation de la base de test:
+$ rake db:test:prepare
+
+Test interactif de l'app:
+$ rails s  # demarre le serveur sur le port 3000
+
+Ouvrir le navigateur sur http://localhost:3000/
+
+Sauvegarde git et deploiement sur heroku:
+$ git commit -m "Nouvelle app initialisee"
+$ git push origin master
+$ git push heroku master
+$ heroku run rake db:migrate
+$ heroku logs
+$ heroku open
+(ouvre une page web avec une errur disant que la
+page demandee n'existe pas. C'est normal.)
+
+Etiquetage git. Notre shema de numerotation sera le suivant:
+1.chap.num 
+ou chap ets le jumero du chapitre et num le numero du tag dans le chapitre. De plus nous ajouterons un commentaore explicite
+a tag, ici 'Nouvelle app vierge creee et deployee sur heroku'
+
+$ git tag -a v1.3.1 -m 'Nouvelle app vierge creee et deployee sur heroku'
+Sauvegarde du tag sur le repo
+$ git push origin v1.3.1   
+
+Installation d'un jeton secret unique: la securite
+de l'application repose sur un secret qui ne doit pas etre
+partage en cas de deploiment de l'application sur de
+multiples sites (scenario possible car notre app
+est en acces libre sur github.) Pour cela on remplace le
+contenu du fichier config/initializers/secret_token.rb
+par ce qui suit:
+
+###### 8<  config/initializers/secret_token.rb   >8 #####
+# Be sure to restart your server when you modify this file.
+
+# Your secret key is used for verifying the integrity of signed cookies.
+# If you change this key, all old signed cookies will become invalid!
+
+# Make sure the secret is at least 30 characters and all random,
+# no regular words or you'll be exposed to dictionary attacks.
+# You can use `rake secret` to generate a secure secret key.
+
+# Make sure your secret_key_base is kept private
+# if you're sharing your code publicly.
+require 'securerandom'
+
+def secure_token
+  token_file = Rails.root.join('.secret')
+  if File.exist?(token_file)
+    # Use the existing token.
+    File.read(token_file).chomp
+  else
+    # Generate a new token and store it in token_file.
+    token = SecureRandom.hex(64)
+    File.write(token_file, token)
+    token
+  end
+end
+
+SampleApp::Application.config.secret_key_base = secure_token
+#######  8<  FIN DU FICHIER  >8 #######
+
+Lors du lancement de l'application, le code precedent cree
+un fichier .secret qu'il faut ajouter au .gitignore
+$ git diff -u .gitignore     # montre ce qui a change
+diff --git a/.gitignore b/.gitignore
+index 060b30b..895ba06 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -16,4 +16,5 @@
+ /tmp
+ 
+ *~
++.secret
+ 
+On peut ensuite sauver a nouveau la version dans git
+$ git add . 
+$ git commit -m "Generation automatique du secret de l'app"
+
+Exercice git (opt): changer le nom et le cntenu du README, puis sauver sur git
+$ mv README.rdoc README.md 
+Changer le contenu comme suit:
+###### 8<  README.md   >8 ##### 
+# Ruby on Rails Tutorial: sample application
+
+This is the sample application for
+the [*Ruby on Rails Tutorial*](http://railstutorial.org/)
+by [Michael Hartl](http://michaelhartl.com/).
+#######  8<  FIN DU FICHIER  >8 #######
+
+$ git commit -am "Improve the README"
+
+Ajout d'un nouveau tag avant de demarrer la creation des pages statiques et verification:
+$ git tag -a v1.3.2 -m 'before starting static-pages'
+$ git push origin v1.3.2
+$ git tag -v v1.3.2
+
+SECTION 3.1
+===========
+
+Debut de l'ajout des pages statiques
+$ git checkout -b static-pages
+
+Ajout d'un controller:
+$ rails generate controller StaticPages home help --no-test-framework
+
+Observer le contenu des fichiers automatiquement generes:
+ - config/routes.rb:
+  Les regles de routage pour les deux pages home et help
+ - app/controllers/static_pages_controller.rb
+  La methodes qui implementent les actions home et help
+ - app/views/static_pages/home.html.erb
+ - app/views/static_pages/help.html.erb
+  Le vues associees aux actions
+
+On commit
+$ git add .
+$ git commit -m "Add a s StaticPages controller"
+
+Pour voir ce qui a change depuis une precedente version:
+- rechercher le numero de la version:
+$ git log
+- afficher la difference
+$ git diff <version precedente>
+
+Ajout d'un tag avant de passer au premier tests (section 3.2)
+$ git tag -a v1.3.3 -m "avant de commence les tests (section 3.2)"
+$ git push origin master
+$ git push origin v1.3.3
+
+SECTION 3.2
+===========
+
+Si ca n'a jamais ete fait dans le projet, il faut initialiser
+rspec:
+$ rails generate rspec:install
+
+Puis creation des tests d'integration
+$ rails generate integration_test static_pages
+
+Observer le contenu du fichier produit
+- spec/requests/static_pages_spec.rb
+
+On remplace le contenu du fichier precedent comme suit:
+###### 8<  spec/requests/static_pages_spec.rb  >8 #####
+require 'spec_helper'
+
+describe "Static pages" do
+
+  describe "Home page" do
+
+    it "should have the content 'Sample App'" do
+      visit '/static_pages/home'
+      expect(page).to have_content('Sample App')
+    end
+  end
+end
+#######  8<  FIN DU FICHIER  >8 #######
+
+Ajout du DSL Capybara a RSpecL (diff)
+$ git diff -u spec/spec_helper.rb 
+diff --git a/spec/spec_helper.rb b/spec/spec_helper.rb
+index 943bc19..031f92c 100644
+--- a/spec/spec_helper.rb
++++ b/spec/spec_helper.rb
+@@ -39,4 +39,5 @@ RSpec.configure do |config|
+   # the seed, which is printed after each run.
+   #     --seed 1234
+   config.order = "random"
++  config.include Capybara::DSL
+ end
+
+Execution du test (rouge)
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+Pour faire passer le test au vert, on corrige la vue:
+###### 8<  app/views/static_pages/home.html.erb >8 #####
+<h1>Sample App</h1>
+<p>
+  This is the home page for the
+  <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  sample application.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+
+Nouvelle execution du test, resultat vert cette fois:
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+Ajout du test :
+$ git diff -u spec/requests/static_pages_spec.rb 
+diff --git a/spec/requests/static_pages_spec.rb b/spec/requests/static_pages_spe
+index 7451c77..bc01b82 100644
+--- a/spec/requests/static_pages_spec.rb
++++ b/spec/requests/static_pages_spec.rb
+@@ -9,4 +9,12 @@ describe "Static pages" do
+       expect(page).to have_content('Sample App')
+     end
+   end
++
++  describe "Help page" do
++
++    it "should have the content 'Help'" do
++      visit '/static_pages/help'
++      expect(page).to have_content('Help')
++    end
++  end
+ end
+
+Modification de la page help:
+###### 8<  app/views/static_pages/help.html.erb >8 #####
+<h1>Help</h1>
+<p>
+  Get help on the Ruby on Rails Tutorial at the
+  <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+  To get help on this sample app, see the
+  <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+
+Et verification que le test est passe au vert:
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+Maintenant on ajoute une 3e page statique, sans utiliser la generation automatique.
+
+On commence par le test:
+$ git diff -u spec/requests/static_pages_spec.rb
+diff --git a/spec/requests/static_pages_spec.rb b/spec/requests/static_pages_spe
+index bc01b82..b25fe5b 100644
+--- a/spec/requests/static_pages_spec.rb
++++ b/spec/requests/static_pages_spec.rb
+@@ -17,4 +17,12 @@ describe "Static pages" do
+       expect(page).to have_content('Help')
+     end
+   end
++
++  describe "About page" do
++
++    it "should have the content 'About Us'" do
++      visit '/static_pages/about'
++      expect(page).to have_content('About Us')
++    end
++  end
+ end
+
+On execute le test, qui se plaint d'une route manquante:
+$ bundle exec rspec spec/requests/static_pages_spec.rb  
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+ Failures:
+
+  1) Static pages About page should have the content 'About Us'
+     Failure/Error: visit '/static_pages/about'
+     ActionController::RoutingError:
+       No route matches [GET] "/static_pages/about"
+     # ./spec/requests/static_pages_spec.rb:24:in `block (3 levels) in <top (required)>'
+
+On corrige en ajoutant une nouvelle route pour la page about:
+% git diff -u config/routes.rb 
+diff --git a/config/routes.rb b/config/routes.rb
+index f3d176d..134f94a 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -1,6 +1,7 @@
+ SampleApp::Application.routes.draw do
+   get "static_pages/home"
+   get "static_pages/help"
++  get "static_pages/about"
+   # The priority is based upon order of creation: first created -> highest prio
+   # See how all your routes lay out with "rake routes".
+ 
+On relance le test, et cette fois il se plaint d'une action manquante:
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+Failures:
+
+  1) Static pages About page should have the content 'About Us'
+     Failure/Error: visit '/static_pages/about'
+     AbstractController::ActionNotFound:
+       The action 'about' could not be found for StaticPagesController
+     # ./spec/requests/static_pages_spec.rb:24:in `block (3 levels) in <top (required)>'
+
+On corrige en ajoutant la nouvelle action dans le controleur:
+$ git diff -u app/controllers/static_pages_controller.rb 
+diff --git a/app/controllers/static_pages_controller.rb b/app/controllers/static
+index c76b925..19f79a9 100644
+--- a/app/controllers/static_pages_controller.rb
++++ b/app/controllers/static_pages_controller.rb
+@@ -4,4 +4,7 @@ class StaticPagesController < ApplicationController
+ 
+   def help
+   end
++
++  def about
++  end
+ end
+
+ On relance le test, et cette fois il se plaint d'une vue manquante:
+$  bundle exec rspec spec/requests/static_pages_spec.rb
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+Failures:
+
+  1) Static pages About page should have the content 'About Us'
+     Failure/Error: visit '/static_pages/about'
+     ActionView::MissingTemplate:
+       Missing template static_pages/about, application/about with {:locale=>[:en], :formats=>[:html], :handlers=>[:erb, :builder, :raw, :ruby, :jbuilder]}. Searched in:
+         * "/home/tprails/rails_projects/sample_app/app/views"
+     # ./spec/requests/static_pages_spec.rb:24:in `block (3 levels) in <top (required)>'
+
+On corrige en ajoutant un fichier pour la vue:
+###### 8<  app/views/static_pages/about.html.erb >8 #####
+<h1>About Us</h1>
+<p>
+  The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  is a project to make a book and screencasts to teach web development
+  with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+  is the sample application for the tutorial.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+
+Cette fois le test passe au vert:
+$bundle exec rspec spec/requests/static_pages_spec.rb
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+Finished in 0.22764 seconds
+3 examples, 0 failures
+
+Randomized with seed 57537
+
+On peut passer aux pages legerement dynamiques (section 3.3)
+$ git tag -a v1.3.4 -m "avant de commencer les pages un peu dynamiques (section 3.3)" 
+$ git push origin v1.3.4 
+
+On va refactoriser le code pour que chaque page statqiue ait un titre de la form "Ruby on Rails Tutorial Sample App | Home".
+
+On commence par deplacer le layout par defaut:
+$ mv app/views/layouts/application.html.erb foobar 
+
+On commence par modifier les tests:
+$ git diff -u spec/requests/static_pages_spec.rb
+diff --git a/spec/requests/static_pages_spec.rb b/spec/requests/static_pages_spe
+index b25fe5b..2d4deef 100644
+--- a/spec/requests/static_pages_spec.rb
++++ b/spec/requests/static_pages_spec.rb
+@@ -8,6 +8,11 @@ describe "Static pages" do
+       visit '/static_pages/home'
+       expect(page).to have_content('Sample App')
+     end
++
++    it "should have the title 'Home'" do
++      visit '/static_pages/home'
++      expect(page).to have_title("Ruby on Rails Tutorial Sample App | Home")
++    end
+   end
+ 
+   describe "Help page" do
+@@ -16,6 +21,11 @@ describe "Static pages" do
+       visit '/static_pages/help'
+       expect(page).to have_content('Help')
+     end
++
++    it "should have the title 'Help'" do
++      visit '/static_pages/help'
++      expect(page).to have_title("Ruby on Rails Tutorial Sample App | Help")
++    end
+   end
+ 
+   describe "About page" do
+@@ -24,5 +34,10 @@ describe "Static pages" do
+       visit '/static_pages/about'
+       expect(page).to have_content('About Us')
+     end
++
++    it "should have the title 'About Us'" do
++      visit '/static_pages/about'
++      expect(page).to have_title("Ruby on Rails Tutorial Sample App | About Us"
++    end
+   end
+ end
+
+On modifie les pages pour faire passer les tests au vert.
+Comme on a supprimer le layout, on doit fournir la totalite du contenu html de la page:
+###### 8<  app/views/static_pages/home.html.erb >8 #####
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ruby on Rails Tutorial Sample App | Home</title>
+  </head>
+  <body>
+    <h1>Sample App</h1>
+    <p>
+      This is the home page for the
+      <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+      sample application.
+    </p>
+  </body>
+</html>
+#######  8<  FIN DU FICHIER  >8 #######
+
+Idem pour les deux autres en remplacant "home" par "help" et "About us"
+
+Et maintenant les tests, qui produisent un erreur inattendue, concernant Capybara:
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+Failures:
+
+  1) Static pages Home page should have the title 'Home'
+     Failure/Error: expect(page).to have_title("Ruby on Rails Tutorial Sample App | Home")
+     NoMethodError:
+       undefined method `has_title?' for #<Capybara::Session>
+     # ./spec/requests/static_pages_spec.rb:14:in `block (3 levels) in <top (required)>'
+
+[... LIGNES D'AFFICHAGE SUPPRIMEES ...]
+
+On corrige cette erruer en mettant a jour la version de Capybara:
+$ git diff -u Gemfile
+diff --git a/Gemfile b/Gemfile
+index a6442ef..5854aba 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -31,7 +31,7 @@ end
+ gem 'jquery-rails'
+ 
+ group :test do
+-   gem 'capybara', '1.1.2'
++   gem 'capybara', '2.1.0'
+ end
+ 
+On relance les tests, et cette fois ils passent tous au vert:
+$ bundle exec rspec spec/requests/static_pages_spec.rb 
+
+Maintenant on peut commencer a factoriser les 3 pages, en separant la partie variable et la partie fixe du titre.
+$ git diff -u app/views/static_pages/home.html.erb 
+diff --git a/app/views/static_pages/home.html.erb b/app/views/static_pages/home.
+index 07593f7..c083036 100644
+--- a/app/views/static_pages/home.html.erb
++++ b/app/views/static_pages/home.html.erb
+@@ -1,7 +1,8 @@
++<% provide(:title, 'Home') %>
+ <!DOCTYPE html>
+ <html>
+   <head>
+-    <title>Ruby on Rails Tutorial Sample App | Home</title>
++    <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+   </head>
+   <body>
+     <h1>Sample App</h1>
+
+(idem dans les 2 autres fichiers)
+Normalement les tests doivent toujours etre verts:
+$ bundle exec rspec spec/requests/static_pages_spec.rb 
+
+Et maintenant on peut passer a la 2e etape du refactoring en placant le code qui se repete a un seul endroit, dans un fichier de layout:
+
+###### 8<  app/views/layouts/application.html.erb >8 #####
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ruby on Rails Tutorial Sample App | <%= yield(:title) %></title>
+  <%= stylesheet_link_tag    "application", media: "all",
+                                            "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+
+<%= yield %>
+#######  8<  FIN DU FICHIER  >8 #######
+
+Et ensuite il faut remodifier chacune des 3 pages pour ne garder que la partie non commune:
+
+###### 8<  app/views/static_pages/home.html.erb >8 #####
+<% provide(:title, 'Home') %>
+<h1>Sample App</h1>
+<p>
+  This is the home page for the
+  <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  sample application.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+###### 8<  app/views/static_pages/help.html.erb >8 #####
+<% provide(:title, 'Help') %>
+<h1>Help</h1>
+<p>
+  Get help on the Ruby on Rails Tutorial at the
+  <a href="http://railstutorial.org/help">Rails Tutorial help page</a>.
+  To get help on this sample app, see the
+  <a href="http://railstutorial.org/book">Rails Tutorial book</a>.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+###### 8<  app/views/static_pages/about.html.erb >8 #####
+<% provide(:title, 'About Us') %>
+<h1>About Us</h1>
+<p>
+  The <a href="http://railstutorial.org/">Ruby on Rails Tutorial</a>
+  is a project to make a book and screencasts to teach web development
+  with <a href="http://rubyonrails.org/">Ruby on Rails</a>. This
+  is the sample application for the tutorial.
+</p>
+#######  8<  FIN DU FICHIER  >8 #######
+
+LEs tests doivent continuer a passer au vert:
+$ bundle exec rspec spec/requests/static_pages_spec.rb
+
+C'est la fin du chapitre, on peut sauver et merger la branche git.
+
+$ git add --all .
+$ git commit -m "Finished static pages"
+$ git checkout master
+$ git merge static-pages
+$ git tag -a v1.3.5 -m "Fin du chapitre 3"
+$ git push origin master
+$ git push origin v1.3.5
+
